@@ -1,0 +1,18 @@
+# --- Zig Build Artifacts ---
+# Contains the compiled binary and library files
+zig-out/
+
+# --- Zig Cache ---
+# Local compilation cache (can get very large)
+.zig-cache/
+
+# --- Zig Package Manager ---
+# This folder contains the source code of your dependencies (zglfw, zopengl, etc.)
+# These are managed by build.zig.zon and should not be in your repo.
+zig-pkg/
+
+# --- OS / IDE Specific ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
