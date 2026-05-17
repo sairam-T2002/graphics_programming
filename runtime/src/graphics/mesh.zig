@@ -33,6 +33,10 @@ pub const Mesh = struct {
     vertices: []const f32,
     indices: []const u32,
     layout: VertexLayout,
+    cull_backfaces: bool = true,
 
     // Pure data container—no init/deinit tracking graphics context states
+    pub fn index_count(self: Mesh) usize {
+        return self.indices.len;
+    }
 };

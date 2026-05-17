@@ -1,6 +1,7 @@
 const std = @import("std");
 const ITexture = @import("interfaces/Itexture.zig").ITexture;
 const zlm = @import("zlm").as(f32);
+const BoundedArray = @import("../core/collections/bounded_array.zig").BoundedArray;
 
 pub const UniformValue = union(enum) {
     boolean: bool,
@@ -14,13 +15,13 @@ pub const UniformValue = union(enum) {
 pub const Material = struct {
     shader_name: []const u8, // E.g., "basic_lit"
     uniforms: std.StringHashMap(UniformValue),
-    textures: std.BoundedArray(ITexture, 8),
+    textures: BoundedArray(ITexture, 8),
 
     pub fn init(allocator: std.mem.Allocator, shader_name: []const u8) Material {
         return .{
             .shader_name = shader_name,
             .uniforms = std.StringHashMap(UniformValue).init(allocator),
-            .textures = std.BoundedArray(ITexture, 8).init(0) catch unreachable,
+            .textures = BoundedArray(ITexture, 8).init(),
         };
     }
 
