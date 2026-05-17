@@ -53,7 +53,7 @@ pub const Shader = struct {
         gl.uniform1i(loc, if (value) 1 else 0);
     }
 
-    pub fn setInt(self: Shader, name: [:0]const u8, value: u32) void {
+    pub fn setInt(self: Shader, name: [:0]const u8, value: c_int) void {
         const loc = gl.getUniformLocation(self.program_id, name);
         gl.uniform1i(loc, value);
     }
@@ -71,6 +71,44 @@ pub const Shader = struct {
     pub fn setFloatVec2(self: Shader, name: [:0]const u8, x: f32, y: f32) void {
         const loc = gl.getUniformLocation(self.program_id, name);
         gl.uniform2f(loc, x, y);
+    }
+
+    /// Sets a 4x4 matrix uniform.
+    /// Accepts a raw slice/array of 16 floats, or a zlm.Mat4 type directly.
+    pub fn setMat4(self: Shader, name: [:0]const u8, mat: anytype, transpose: gl.Boolean) void {
+        const T = @TypeOf(mat);
+        const loc = gl.getUniformLocation(self.program_id, name);
+
+        // Check if it's a zlm matrix (which contains a 'fields' declaration)
+        if (@hasDecl(T, "fields")) {
+            const ptr: [*]const f32 = @ptrCast(&mat.fields);
+            gl.uniformMatrix4fv(loc, 1, transpose, ptr);
+        } else if (T == []const f32 or T == []f32) {
+            std.debug.assert(mat.len == 16);
+            gl.uniformMatrix4fv(loc, 1, transpose, mat.ptr);
+        } else {
+            // Handles fixed-size arrays like [16]f32 or [4][4]f32
+            const ptr: [*]const f32 = @ptrCast(&mat);
+            gl.uniformMatrix4fv(loc, 1, transpose, ptr);
+        }
+    }
+
+    /// Sets a 3x3 matrix uniform.
+    /// Accepts a raw slice/array of 9 floats, or a zlm.Mat3 type directly.
+    pub fn setMat3(self: Shader, name: [:0]const u8, mat: anytype, transpose: gl.GLboolean) void {
+        const T = @TypeOf(mat);
+        const loc = gl.getUniformLocation(self.program_id, name);
+
+        if (@hasDecl(T, "fields")) {
+            const ptr: [*]const f32 = @ptrCast(&mat.fields);
+            gl.uniformMatrix3fv(loc, 1, transpose, ptr);
+        } else if (T == []const f32 or T == []f32) {
+            std.debug.assert(mat.len == 9);
+            gl.uniformMatrix3fv(loc, 1, transpose, mat.ptr);
+        } else {
+            const ptr: [*]const f32 = @ptrCast(&mat);
+            gl.uniformMatrix3fv(loc, 1, transpose, ptr);
+        }
     }
 
     fn _createShader(source: [:0]const u8, shader_type: c_uint) c_uint {

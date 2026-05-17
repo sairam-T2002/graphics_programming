@@ -16,8 +16,20 @@ pub fn build(b: *std.Build) void {
 
     const zopengl_dep = b.dependency("zopengl", .{});
 
+    const zstbi_dep = b.dependency("zstbi", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const zlm_dep = b.dependency("zlm", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     mod.addImport("zglfw", zglfw_dep.module("root"));
     mod.addImport("zopengl", zopengl_dep.module("root"));
+    mod.addImport("zstbi", zstbi_dep.module("root"));
+    mod.addImport("zlm", zlm_dep.module("zlm"));
 
     if (target.result.os.tag != .emscripten) {
         mod.linkLibrary(zglfw_dep.artifact("glfw"));
@@ -34,6 +46,11 @@ pub fn build(b: *std.Build) void {
             },
         }),
     });
+
+    exe.root_module.addImport("zglfw", zglfw_dep.module("root"));
+    exe.root_module.addImport("zopengl", zopengl_dep.module("root"));
+    exe.root_module.addImport("zstbi", zstbi_dep.module("root"));
+    exe.root_module.addImport("zlm", zlm_dep.module("zlm"));
 
     b.installArtifact(exe);
 
